@@ -154,6 +154,11 @@ class Cars196(tfds.core.GeneratorBasedBuilder):
   """Car Images dataset."""
 
   VERSION = tfds.core.Version('2.0.0')
+  SUPPORTED_VERSIONS = [
+      tfds.core.Version(
+          '2.0.1', experiments={tfds.core.Experiment.METADATA: True}
+      ),
+  ]
 
   def _info(self):
     """Define the dataset info."""
@@ -161,6 +166,7 @@ class Cars196(tfds.core.GeneratorBasedBuilder):
         builder=self,
         description=(_DESCRIPTION),
         features=tfds.features.FeaturesDict({
+            'id': tfds.features.Text(),
             'image': tfds.features.Image(),
             'label': tfds.features.ClassLabel(names=_NAMES),
             'bbox': tfds.features.BBoxFeature(),
@@ -219,6 +225,7 @@ class Cars196(tfds.core.GeneratorBasedBuilder):
       image = image_dict[image_name]
       bbox = bbox_dict[image_name]
       yield image_name, {
+          'id': image_name,
           'label': label,
           'image': image,
           'bbox': bbox,

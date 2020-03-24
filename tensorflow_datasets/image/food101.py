@@ -56,6 +56,9 @@ class Food101(tfds.core.GeneratorBasedBuilder):
       tfds.core.Version(
           "1.0.0",
           tfds_version_to_prepare="8cea22f06d74d5848608fe7ac6d6faac7bc05b55"),
+      tfds.core.Version(
+          "2.0.1", experiments={tfds.core.Experiment.METADATA: True}
+      ),
   ]
 
   def _info(self):
@@ -66,6 +69,7 @@ class Food101(tfds.core.GeneratorBasedBuilder):
         builder=self,
         description=(_DESCRIPTION),
         features=tfds.features.FeaturesDict({
+            "id": tfds.features.Text(),
             "image": tfds.features.Image(),
             "label": tfds.features.ClassLabel(names_file=names_file),
         }),
@@ -106,6 +110,7 @@ class Food101(tfds.core.GeneratorBasedBuilder):
       for image_name in images:
         image = os.path.join(image_dir_path, image_name + ".jpg")
         yield image_name, {
+            "id": image_name,
             "image": image,
             "label": label,
         }

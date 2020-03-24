@@ -45,6 +45,11 @@ class SvhnCropped(tfds.core.GeneratorBasedBuilder):
 
   VERSION = tfds.core.Version(
       "3.0.0", "New split API (https://tensorflow.org/datasets/splits)")
+  SUPPORTED_VERSIONS = [
+      tfds.core.Version(
+          "3.0.1", experiments={tfds.core.Experiment.METADATA: True}
+      ),
+  ]
 
   def _info(self):
     return tfds.core.DatasetInfo(
@@ -54,6 +59,7 @@ class SvhnCropped(tfds.core.GeneratorBasedBuilder):
             "recognition dataset of over 600,000 digit images coming from "
             "real world data. Images are cropped to 32x32."),
         features=tfds.features.FeaturesDict({
+            "id": tfds.features.Text(),
             "image": tfds.features.Image(shape=(32, 32, 3)),
             "label": tfds.features.ClassLabel(num_classes=10),
         }),
@@ -74,24 +80,28 @@ class SvhnCropped(tfds.core.GeneratorBasedBuilder):
         tfds.core.SplitGenerator(
             name=tfds.Split.TRAIN,
             gen_kwargs=dict(
+                split_prefix="train_",
                 filepath=output_files["train"],
             )),
         tfds.core.SplitGenerator(
             name=tfds.Split.TEST,
             gen_kwargs=dict(
+                split_prefix="test_",
                 filepath=output_files["test"],
             )),
         tfds.core.SplitGenerator(
             name="extra",
             gen_kwargs=dict(
+                split_prefix="extra_",
                 filepath=output_files["extra"],
             )),
     ]
 
-  def _generate_examples(self, filepath):
+  def _generate_examples(self, split_prefix, filepath):
     """Generate examples as dicts.
 
     Args:
+      split_prefix: `str` prefix that identifies the split.
       filepath: `str` path of the file to process.
 
     Yields:
@@ -109,6 +119,7 @@ class SvhnCropped(tfds.core.GeneratorBasedBuilder):
         np.rollaxis(data["X"], -1), data["y"])):
       label = label.reshape(())
       record = {
+          "id": "{}{:06d}".format(split_prefix, i),
           "image": image,
           "label": label % 10,  # digit 0 is saved as 0 (instead of 10)
       }

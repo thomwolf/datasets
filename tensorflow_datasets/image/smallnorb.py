@@ -56,12 +56,19 @@ class Smallnorb(tfds.core.GeneratorBasedBuilder):
 
   VERSION = tfds.core.Version(
       "2.0.0", "New split API (https://tensorflow.org/datasets/splits)")
+  SUPPORTED_VERSIONS = [
+      tfds.core.Version(
+          "2.0.1", experiments={tfds.core.Experiment.METADATA: True}
+      ),
+  ]
 
   def _info(self):
     return tfds.core.DatasetInfo(
         builder=self,
         description=_DESCRIPTION,
         features=tfds.features.FeaturesDict({
+            "id":
+                tfds.features.Text(),
             "image":
                 tfds.features.Image(shape=(96, 96, 1)),
             "image2":
@@ -102,21 +109,24 @@ class Smallnorb(tfds.core.GeneratorBasedBuilder):
         tfds.core.SplitGenerator(
             name=tfds.Split.TRAIN,
             gen_kwargs=dict(
+                split_prefix="train_",
                 dat_path=files["training_dat"],
                 cat_path=files["training_cat"],
                 info_path=files["training_info"])),
         tfds.core.SplitGenerator(
             name=tfds.Split.TEST,
             gen_kwargs=dict(
+                split_prefix="test_",
                 dat_path=files["testing_dat"],
                 cat_path=files["testing_cat"],
                 info_path=files["testing_info"])),
     ]
 
-  def _generate_examples(self, dat_path, cat_path, info_path):
+  def _generate_examples(self, split_prefix, dat_path, cat_path, info_path):
     """Generate examples for the Smallnorb dataset.
 
     Args:
+      split_prefix: Prefix that identifies the split.
       dat_path: Path to dat file of the chunk.
       cat_path: Path to cat file of the chunk.
       info_path: Path to info file of the chunk.
@@ -129,6 +139,7 @@ class Smallnorb(tfds.core.GeneratorBasedBuilder):
     for i, (image, category, info_vec) in enumerate(moves.zip(
         dat_arr, cat_arr, info_arr)):
       record = {
+          "id": "{}{:05d}".format(split_prefix, i),
           "image": image[0],
           "image2": image[1],
           "label_category": category,

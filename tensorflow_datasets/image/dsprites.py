@@ -71,12 +71,19 @@ class Dsprites(tfds.core.GeneratorBasedBuilder):
 
   VERSION = tfds.core.Version(
       "2.0.0", "New split API (https://tensorflow.org/datasets/splits)")
+  SUPPORTED_VERSIONS = [
+      tfds.core.Version(
+          "2.0.1", experiments={tfds.core.Experiment.METADATA: True}
+      ),
+  ]
 
   def _info(self):
     return tfds.core.DatasetInfo(
         builder=self,
         description=_DESCRIPTION,
         features=tfds.features.FeaturesDict({
+            "id":
+                tfds.features.Text(),
             "image":
                 tfds.features.Image(shape=(64, 64, 1)),
             "label_shape":
@@ -130,6 +137,7 @@ class Dsprites(tfds.core.GeneratorBasedBuilder):
     for i, (image, classes, values) in enumerate(moves.zip(
         image_array, class_array, values_array)):
       record = dict(
+          id="{:06d}".format(i),
           image=np.expand_dims(image, -1),
           label_shape=classes[1],
           label_scale=classes[2],
